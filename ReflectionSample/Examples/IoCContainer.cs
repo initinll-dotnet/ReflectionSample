@@ -33,8 +33,10 @@ public class IoCContainer
               _map.ContainsKey(typeof(TContract).GetGenericTypeDefinition()))
         {
             var openImplementation = _map[typeof(TContract).GetGenericTypeDefinition()];
-            var closedImplementation = openImplementation.MakeGenericType(
-                typeof(TContract).GenericTypeArguments);
+
+            var closedImplementation = openImplementation
+                .MakeGenericType(typeof(TContract).GenericTypeArguments);
+
             return Create<TContract>(closedImplementation);
         }
 
@@ -55,18 +57,20 @@ public class IoCContainer
             _resolveMethod = typeof(IoCContainer).GetMethod("Resolve");
         }
 
-        var constructorParameters = implementationType.GetConstructors()
-             .OrderByDescending(c => c.GetParameters().Length)
-             .First()
-             .GetParameters()
-             .Select(p =>
-             {
-                 // make the resolve method generic and invoke it
-                 var genericResolveMethod = _resolveMethod?.MakeGenericMethod(p.ParameterType);
-                 return genericResolveMethod?.Invoke(this, null);
-             })
-             .ToArray();
+        var constructorParameters = implementationType
+            .GetConstructors()
+            .OrderByDescending(c => c.GetParameters().Length)
+            .First()
+            .GetParameters()
+            .Select(p =>
+            {
+                // make the resolve method generic and invoke it
+                var genericResolveMethod = _resolveMethod
+                    ?.MakeGenericMethod(p.ParameterType);
 
+                return genericResolveMethod?.Invoke(this, null);
+            })
+            .ToArray();
 
         return (TContract)Activator.CreateInstance(implementationType, constructorParameters);
     }

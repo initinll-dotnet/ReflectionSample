@@ -6,8 +6,7 @@ public class CoffeeService : ICoffeeService
     {
     }
 
-    public CoffeeService(IWaterService waterService,
-        IBeanService<Catimor> beanService)
+    public CoffeeService(IWaterService waterService, IBeanService<Catimor> beanService)
     {
     }
 }

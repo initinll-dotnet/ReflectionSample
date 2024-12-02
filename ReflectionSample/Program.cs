@@ -242,59 +242,79 @@ static void Module_UsingReflection_For_InstantiatingAndManipulatingObjects_Netwo
     NetworkMonitor.Warn();
 }
 
-static void CodeFromFourthModule()
+static void Module_UsingReflection_With_Generics()
 {
+    // checking metadata
+
     var myList = new List<Person>();
     Console.WriteLine(myList.GetType());
 
+    // bounded generics
     var myDictionary = new Dictionary<string, int>();
     Console.WriteLine(myDictionary.GetType());
 
     var dictionaryType = myDictionary.GetType();
 
+    // 1. check generics metadata via GenericTypeArguments
     foreach (var genericTypeArgument in dictionaryType.GenericTypeArguments)
     {
         Console.WriteLine(genericTypeArgument);
     }
 
+    // 2. check generics metadata via GetGenericArguments()
     foreach (var genericArgument in dictionaryType.GetGenericArguments())
     {
         Console.WriteLine(genericArgument);
     }
 
+    // unbound generics
     var openDictionaryType = typeof(Dictionary<,>);
 
+    // 1. check generics metadata via GenericTypeArguments
     foreach (var genericTypeArgument in openDictionaryType.GenericTypeArguments)
     {
         Console.WriteLine(genericTypeArgument);
     }
 
+    // 2. check generics metadata via GetGenericArguments()
     foreach (var genericArgument in openDictionaryType.GetGenericArguments())
     {
         Console.WriteLine(genericArgument);
     }
 
+    // creting & invoking generic instances
+
+    // method 0
     var createdInstance = Activator.CreateInstance(typeof(List<Person>));
     Console.WriteLine(createdInstance.GetType());
 
+    // method 1
     //var openResultType = typeof(Result<>);
     //var closedResultType = openResultType.MakeGenericType(typeof(Person));
     //var createdResult = Activator.CreateInstance(closedResultType);
     //Console.WriteLine(createdResult.GetType());
 
+    // method 2
     var openResultType = Type.GetType("ReflectionSample.Examples.Result`1");
     var closedResultType = openResultType.MakeGenericType(Type.GetType("ReflectionSample.Examples.Person"));
     var createdResult = Activator.CreateInstance(closedResultType);
     Console.WriteLine(createdResult.GetType());
 
+    // get generic method - public T AlterAndReturnValue<S>(S input)
     var methodInfo = closedResultType.GetMethod("AlterAndReturnValue");
     Console.WriteLine(methodInfo);
 
+    // make generic method for type <Employee> - public T AlterAndReturnValue<S>(S input)
     var genericMethodInfo = methodInfo.MakeGenericMethod(typeof(Employee));
-    genericMethodInfo.Invoke(createdResult, new object[] { new Employee() });
+
+    // invoking generic method for type <Employee> - public T AlterAndReturnValue<S>(S input)
+    genericMethodInfo
+        .Invoke(
+            obj: createdResult, 
+            parameters: new object[] { new Employee() });
 }
 
-static void IoCContainerExample()
+static void Module_UsingReflection_With_Generics_IoCContainerExample()
 {
     var iocContainer = new IoCContainer();
 
