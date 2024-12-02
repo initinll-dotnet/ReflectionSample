@@ -21,7 +21,7 @@ person.AsDynamic()._aPrivateField = "Updated value via ReflectionMagic";
 
 Console.ReadLine();
 
-static void CodeFromSecondModule()
+static void Module_UsingReflection_For_InpectingMetadata()
 {
     //string name = "Kevin";
     //var stringType = name.GetType();
