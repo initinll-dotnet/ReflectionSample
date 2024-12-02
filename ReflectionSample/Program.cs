@@ -7,9 +7,10 @@ using System.Reflection;
 Console.Title = "Learning Reflection";
 
 var person = new Person("Kevin");
-var privateField = person.GetType().GetField(
-    "_aPrivateField",
-    BindingFlags.Instance | BindingFlags.NonPublic);
+
+var privateField = person
+    .GetType()
+    .GetField(name: "_aPrivateField", bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic);
 
 privateField?.SetValue(person, "New private field value");
 
@@ -23,6 +24,7 @@ Console.ReadLine();
 static void IoCContainerExample()
 {
     var iocContainer = new IoCContainer();
+
     iocContainer.Register<IWaterService, TapWaterService>();
     var waterService = iocContainer.Resolve<IWaterService>();
 
@@ -44,20 +46,24 @@ static void CodeFromFourthModule()
     Console.WriteLine(myDictionary.GetType());
 
     var dictionaryType = myDictionary.GetType();
+
     foreach (var genericTypeArgument in dictionaryType.GenericTypeArguments)
     {
         Console.WriteLine(genericTypeArgument);
     }
+
     foreach (var genericArgument in dictionaryType.GetGenericArguments())
     {
         Console.WriteLine(genericArgument);
     }
 
     var openDictionaryType = typeof(Dictionary<,>);
+
     foreach (var genericTypeArgument in openDictionaryType.GenericTypeArguments)
     {
         Console.WriteLine(genericTypeArgument);
     }
+
     foreach (var genericArgument in openDictionaryType.GetGenericArguments())
     {
         Console.WriteLine(genericArgument);
@@ -95,18 +101,19 @@ static void NetworkMonitorExample()
 static void CodeFromThirdModule()
 {
     var personType = typeof(Person);
-    var personConstructors = personType.GetConstructors(
-        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+    var personConstructors = personType
+        .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
     foreach (var personConstructor in personConstructors)
     {
         Console.WriteLine(personConstructor);
     }
 
-    var privatePersonConstructor = personType.GetConstructor(
+    var privatePersonConstructor = personType
+        .GetConstructor(
         BindingFlags.Instance | BindingFlags.NonPublic,
         null,
-        new Type[] { typeof(string), typeof(int) },
+        [typeof(string), typeof(int)],
         null);
 
     var person1 = personConstructors[0].Invoke(null);
