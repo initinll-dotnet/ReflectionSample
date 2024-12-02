@@ -41,14 +41,15 @@ static void CodeFromSecondModule()
     {
         Console.WriteLine(constructor);
     }
-    foreach (var method in oneTypeFromCurrentAssembly.GetMethods(
-        BindingFlags.Public | BindingFlags.NonPublic))
+
+    foreach (var method in oneTypeFromCurrentAssembly
+        .GetMethods(BindingFlags.Public | BindingFlags.NonPublic))
     {
         Console.WriteLine($"{method}, public: {method.IsPublic}");
     }
 
-    foreach (var field in oneTypeFromCurrentAssembly.GetFields(
-        BindingFlags.Instance | BindingFlags.NonPublic))
+    foreach (var field in oneTypeFromCurrentAssembly
+        .GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
     {
         Console.WriteLine(field);
     }
