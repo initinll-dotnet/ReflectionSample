@@ -41,8 +41,10 @@ public static class NetworkMonitor
         appSettingsConfig.Bind("NetworkMonitorSettings", _networkMonitorSettings);
 
         // inspect the assembly to check whether the correct types are contained within
-        _warningServiceType = Assembly.GetExecutingAssembly()
+        _warningServiceType = Assembly
+            .GetExecutingAssembly()
             .GetType(_networkMonitorSettings.WarningService);
+
         if (_warningServiceType == null)
         {
             throw new Exception("Configuration is invalid - warning service not found");
@@ -51,6 +53,7 @@ public static class NetworkMonitor
         // inspect the service for the required method 
         _warningServiceMethod = _warningServiceType
             .GetMethod(_networkMonitorSettings.MethodToExecute);
+
         if (_warningServiceMethod == null)
         {
             throw new Exception("Configuration is invalid - method to execute on warning service not found");

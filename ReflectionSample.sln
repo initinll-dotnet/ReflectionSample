@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{26ED16
 		Images\2.ReflectionUsecases.png = Images\2.ReflectionUsecases.png
 		Images\3.ReflectionInfoHierarchy.png = Images\3.ReflectionInfoHierarchy.png
 		Images\4.ReflectionBindings.png = Images\4.ReflectionBindings.png
+		Images\5.ReflectionBTS.png = Images\5.ReflectionBTS.png
 	EndProjectSection
 EndProject
 Global

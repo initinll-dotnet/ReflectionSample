@@ -68,98 +68,178 @@ static void Module_UsingReflection_For_InpectingMetadata()
 
 }
 
-static void CodeFromThirdModule()
+static void Module_UsingReflection_For_InstantiatingAndManipulatingObjects()
 {
     var personType = typeof(Person);
+
+    // get constructors info
     var personConstructors = personType
-        .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        .GetConstructors(
+            bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
     foreach (var personConstructor in personConstructors)
     {
         Console.WriteLine(personConstructor);
     }
 
+    // get person constructor info
     var privatePersonConstructor = personType
         .GetConstructor(
-        BindingFlags.Instance | BindingFlags.NonPublic,
-        null,
-        [typeof(string), typeof(int)],
-        null);
+            bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic,
+            binder: null,
+            types: [typeof(string), typeof(int)], // should match constructor parameter types
+            modifiers: null);
 
-    var person1 = personConstructors[0].Invoke(null);
-    var person2 = personConstructors[1].Invoke(new object[] { "Kevin" });
-    var person3 = personConstructors[2].Invoke(new object[] { "Kevin", 40 });
+    // invoking constructor - public Person()
+    var person1 = personConstructors[0].Invoke(parameters: null);
 
-    var person4 = Activator.CreateInstance("ReflectionSample", "ReflectionSample.Examples.Person").Unwrap();
+    // invoking constructor - public Person(string name)
+    var person2 = personConstructors[1].Invoke(parameters: new object[] { "Kevin" });
 
-    var person5 = Activator.CreateInstance("ReflectionSample",
-        "ReflectionSample.Examples.Person",
-        true,
-        BindingFlags.Instance | BindingFlags.Public,
-        null,
-        new object[] { "Kevin" },
-        null,
-        null);
+    // invoking constructor - private Person(string name, int age)
+    var person3 = personConstructors[2].Invoke(parameters: new object[] { "Kevin", 40 });
+
+    var person33 = Activator
+        .CreateInstance(typeof(Person));
+
+    // invoking  constructor dynamically by Name
+    // invoking constructor - public Person()
+    var person4 = Activator
+        .CreateInstance(
+            assemblyName: "ReflectionSample",
+            typeName: "ReflectionSample.Examples.Person")
+        ?.Unwrap();
+
+    // invoking constructor - public Person(string name)
+    var person5 = Activator
+        .CreateInstance(
+            assemblyName: "ReflectionSample",
+            typeName: "ReflectionSample.Examples.Person",
+            ignoreCase: true,
+            bindingAttr: BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            args: new object[] { "Kevin" },
+            culture: null,
+            activationAttributes: null);
 
     var personTypeFromString = Type.GetType("ReflectionSample.Examples.Person");
-    var person6 = Activator.CreateInstance(personTypeFromString,
-        new object[] { "Kevin" });
 
-    var person7 = Activator.CreateInstance("ReflectionSample",
-        "ReflectionSample.Examples.Person",
-        true,
-        BindingFlags.Instance | BindingFlags.NonPublic,
-        null,
-        new object[] { "Kevin", 40 },
-        null,
-        null);
+    var person6 = Activator
+        .CreateInstance(
+            type: personTypeFromString,
+            args: new object[] { "Kevin" });
 
+    // invoking constructor - private Person(string name, int age)
+    var person7 = Activator
+        .CreateInstance(
+            assemblyName: "ReflectionSample",
+            typeName: "ReflectionSample.Examples.Person",
+            ignoreCase: true,
+            bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic,
+            binder: null,
+            args: new object[] { "Kevin", 40 },
+            culture: null,
+            activationAttributes: null);
+
+    // invoking constructor - using Assembly
     var assembly = Assembly.GetExecutingAssembly();
     var person8 = assembly.CreateInstance("ReflectionSample.Examples.Person");
+
+    // Working with an object through Interfaces
 
     // create a new instance of a configured type
     var actualTypeFromConfiguration = Type.GetType(GetTypeFromConfiguration());
     var iTalkInstance = Activator.CreateInstance(actualTypeFromConfiguration) as ITalk;
     iTalkInstance.Talk("Hello world!");
 
+    // Working with an object through Interfaces
+
     dynamic dynamicITalkInstance = Activator.CreateInstance(actualTypeFromConfiguration);
     dynamicITalkInstance.Talk("Hello world!");
 
-    var personForManipulation = Activator.CreateInstance("ReflectionSample",
-        "ReflectionSample.Examples.Person",
-        true,
-        BindingFlags.Instance | BindingFlags.NonPublic,
-        null,
-        new object[] { "Kevin", 40 },
-        null,
-        null)?.Unwrap();
+    var personForManipulation = Activator
+        .CreateInstance(
+            assemblyName: "ReflectionSample",
+            typeName: "ReflectionSample.Examples.Person",
+            ignoreCase: true,
+            bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic,
+            binder: null,
+            args: new object[] { "Kevin", 40 },
+            culture: null,
+            activationAttributes: null)
+        ?.Unwrap();
 
+    // getting and setting properties and fields
+
+    // get Person Name property - public string Name { get; set; }
     var nameProperty = personForManipulation?.GetType().GetProperty("Name");
+    // set Person Name property - public string Name { get; set; }
     nameProperty?.SetValue(personForManipulation, "Sven");
 
+    // get Person age field - public int age;
     var ageField = personForManipulation?.GetType().GetField("age");
+    // set Person age field - public int age;
     ageField?.SetValue(personForManipulation, 36);
 
-    var privateField = personForManipulation?.GetType().GetField("_aPrivateField",
-        BindingFlags.Instance | BindingFlags.NonPublic);
+    // get Person age field - private string _aPrivateField = "initial private field value";
+    var privateField = personForManipulation?.GetType()
+        .GetField("_aPrivateField", BindingFlags.Instance | BindingFlags.NonPublic);
+    // set Person age field - private string _aPrivateField = "initial private field value";
     privateField?.SetValue(personForManipulation, "updated private field value");
 
-    personForManipulation?.GetType().InvokeMember("Name",
-        BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty,
-        null, personForManipulation, new[] { "Emma" });
+    // set Person Name property - public string Name { get; set; }
+    personForManipulation
+        ?.GetType()
+        .InvokeMember(
+            name: "Name",
+            invokeAttr: BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty,
+            binder: null,
+            target: personForManipulation,
+            args: new[] { "Emma" });
 
-    personForManipulation?.GetType().InvokeMember("_aPrivateField",
-        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.SetField,
-        null, personForManipulation, new[] { "second update for private field value" });
+    // set Person age field - private string _aPrivateField = "initial private field value";
+    personForManipulation
+        ?.GetType()
+        .InvokeMember(
+            name: "_aPrivateField",
+            invokeAttr: BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.SetField,
+            binder: null,
+            target: personForManipulation,
+            args: new[] { "second update for private field value" });
 
     Console.WriteLine(personForManipulation);
 
-    var talkMethod = personForManipulation?.GetType().GetMethod("Talk");
-    talkMethod?.Invoke(personForManipulation, new[] { "something to say" });
+    // invoking methods
 
-    personForManipulation?.GetType().InvokeMember("Yell",
-        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.InvokeMethod,
-        null, personForManipulation, new[] { "something to yell" });
+    // get method - public void Talk(string sentence)
+    var talkMethod = personForManipulation
+        ?.GetType()
+        .GetMethod("Talk");
+
+    // invoke method - public void Talk(string sentence)
+    talkMethod
+        ?.Invoke(
+            obj: personForManipulation, 
+            parameters: new[] { "something to say" });
+
+    // invoke method - protected void Yell(string sentence)
+    personForManipulation
+        ?.GetType()
+        .InvokeMember(
+            name: "Yell",
+            invokeAttr: BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.InvokeMethod,
+            binder: null, 
+            target: personForManipulation, 
+            args: new[] { "something to yell" });
+}
+
+static void Module_UsingReflection_For_InstantiatingAndManipulatingObjects_NetworkMonitorExample()
+{
+    NetworkMonitor.BootstrapFromConfiguration();
+
+    Console.WriteLine("Monitoring network... something went wrong.");
+
+    NetworkMonitor.Warn();
 }
 
 static void CodeFromFourthModule()
@@ -230,16 +310,7 @@ static void IoCContainerExample()
     var coffeeService = iocContainer.Resolve<ICoffeeService>();
 }
 
-static void NetworkMonitorExample()
-{
-    NetworkMonitor.BootstrapFromConfiguration();
-
-    Console.WriteLine("Monitoring network... something went wrong.");
-
-    NetworkMonitor.Warn();
-}
-
 static string GetTypeFromConfiguration()
 {
-    return "ReflectionSample.Person";
+    return "ReflectionSample.Examples.Person";
 }
